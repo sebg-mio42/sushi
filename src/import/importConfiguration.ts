@@ -889,7 +889,7 @@ function parseInstanceOptions(
         'instanceOptions.setId',
         file
       ) || 'always',
-    manualSliceOrdering: yamlInstanceOptions?.manualSliceOrdering ?? false
+    manualSliceOrdering: yamlInstanceOptions?.manualSliceOrdering ?? true
   };
 }
 
