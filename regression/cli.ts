@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import readlineSync from 'readline-sync';
 import { Command } from 'commander';
 import { Config, RegressionData, Repo, run, logOptions } from './run';
+import { fish } from './fish';
 import { findReposUsingFSHFinder, findReposUsingLegacyApproach } from './find';
 
 main().catch(err => {
@@ -48,6 +49,18 @@ async function main() {
       path.relative(process.cwd(), path.join(__dirname, 'output'))
     )
     .action(runAction);
+
+  program
+    .command('fish')
+    .description('Download FSH from repositories found using FSH Finder')
+    .option('-c, --count <number>', 'number of repositories to show')
+    .option('-l, --lookback <days>', 'lookback period in days')
+    .option(
+      '-o, --output <folder>',
+      'The folder to write fished up projects to',
+      path.relative(process.cwd(), path.join(__dirname, 'output'))
+    )
+    .action(fishAction);
 
   program
     .command('list')
@@ -151,6 +164,15 @@ async function runAction(options: any) {
   }
 
   return run(config, data);
+}
+
+async function fishAction(options: any) {
+  const count = options.count != null ? parseInt(options.count) : undefined;
+  const lookback = options.lookback != null ? parseInt(options.lookback) : undefined;
+  const output = path.isAbsolute(options.output)
+    ? path.normalize(options.output)
+    : path.normalize(path.join(process.cwd(), options.output));
+  return fish(output, count, lookback);
 }
 
 async function listAction(options: any) {
