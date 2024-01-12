@@ -1364,25 +1364,11 @@ export class ElementDefinition {
         break;
       }
       // fishForMetadataBestVersion is not used here in order to provide additional details in the warning
-      let result = fisher.fishForMetadata(
-        currentType,
-        Type.Resource,
-        Type.Logical,
-        Type.Type,
-        Type.Profile,
-        Type.Extension
-      );
+      let result = fisher.fishForMetadata(currentType);
       if (result == null) {
         const [name, ...versionParts] = currentType.split('|');
         const version = versionParts.join('|') || null;
-        result = fisher.fishForMetadata(
-          name,
-          Type.Extension,
-          Type.Profile,
-          Type.Resource,
-          Type.Logical,
-          Type.Type
-        );
+        result = fisher.fishForMetadata(name);
         if (result && version != null && result.version != null && result.version != version) {
           logger.warn(
             `${type} is based on ${name} version ${version}, but SUSHI found version ${result.version}`
@@ -1406,17 +1392,7 @@ export class ElementDefinition {
       const imposeProfiles: string[] = [];
       results.forEach(md => {
         md.imposeProfiles?.forEach(p => {
-          const url =
-            p instanceof FshCanonical
-              ? fisher.fishForMetadata(
-                  p.entityName,
-                  Type.Extension,
-                  Type.Profile,
-                  Type.Resource,
-                  Type.Logical,
-                  Type.Type
-                )?.url
-              : p;
+          const url = p instanceof FshCanonical ? fisher.fishForMetadata(p.entityName)?.url : p;
           if (url && !imposeProfiles.includes(url) && !seenUrls.includes(url)) {
             imposeProfiles.push(url);
           }
@@ -1746,8 +1722,7 @@ export class ElementDefinition {
       this.binding = { strength };
     } else {
       // Canonical URLs may include | to specify version: https://www.hl7.org/fhir/references.html#canonical
-      // The URI may be a fragment starting with #
-      if (!isUri(vsURI.split('|')[0]) && !vsURI.startsWith('#')) {
+      if (!isUri(vsURI.split('|')[0])) {
         throw new InvalidUriError(vsURI);
       }
 

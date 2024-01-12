@@ -1,7 +1,7 @@
 import { FshEntity } from './FshEntity';
 import { Rule } from './rules';
 import { EOL } from 'os';
-import { fshifyString, getNonInstanceValueFromRules } from './common';
+import { fshifyString, findIdCaretRule } from './common';
 
 export abstract class FshStructure extends FshEntity {
   private _id: string;
@@ -21,9 +21,9 @@ export abstract class FshStructure extends FshEntity {
   }
 
   get id() {
-    const assignedId = getNonInstanceValueFromRules(this, 'id', '', 'id');
-    if (assignedId) {
-      return assignedId.toString();
+    const idCaretRule = findIdCaretRule(this.rules);
+    if (idCaretRule) {
+      return idCaretRule.value.toString();
     }
     return this._id;
   }

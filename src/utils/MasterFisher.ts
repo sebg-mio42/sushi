@@ -79,10 +79,9 @@ export class MasterFisher implements Fishable {
         // only its InstanceOf. But here we have access to the other fishers, so we can try
         // to figure that resourceType out here
         if (fishable instanceof FSHTank && !result.resourceType) {
-          const fshDefinition = fishable.fish(item, ...types);
-          if (fshDefinition instanceof Instance) {
-            result.resourceType = this.fishForMetadata(fshDefinition.instanceOf)?.sdType;
-          }
+          result.resourceType = this.fishForMetadata(
+            (fishable.fish(item, Type.Instance) as Instance)?.instanceOf
+          )?.sdType;
         }
         // Add url to metadata for non-inline Instances
         if (!result.url && result.instanceUsage !== 'Inline') {

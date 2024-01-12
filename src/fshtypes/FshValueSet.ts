@@ -1,7 +1,7 @@
 import { FshEntity } from './FshEntity';
 import { CaretValueRule, InsertRule, ValueSetComponentRule } from './rules';
 import { EOL } from 'os';
-import { fshifyString, getNonInstanceValueFromRules } from './common';
+import { fshifyString, findIdCaretRule } from './common';
 
 /**
  * For more information about the composition of a ValueSet,
@@ -24,9 +24,9 @@ export class FshValueSet extends FshEntity {
   }
 
   get id() {
-    const assignedId = getNonInstanceValueFromRules(this, 'id', '', 'id');
-    if (assignedId) {
-      return assignedId.toString();
+    const idCaretRule = findIdCaretRule(this.rules);
+    if (idCaretRule) {
+      return idCaretRule.value.toString();
     }
     return this._id;
   }
