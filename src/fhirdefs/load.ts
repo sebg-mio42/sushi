@@ -2,9 +2,7 @@ import { FHIRDefinitions } from './FHIRDefinitions';
 import { mergeDependency } from 'fhir-package-loader';
 import fs from 'fs-extra';
 import path from 'path';
-import junk from 'junk';
-import { logger, logMessage, getFilesRecursive } from '../utils';
-import { Fhir as FHIRConverter } from 'fhir/fhir';
+import { logger, logMessage } from '../utils';
 import { ImplementationGuideDefinitionParameter } from '../fhirtypes';
 
 /**
@@ -13,14 +11,13 @@ import { ImplementationGuideDefinitionParameter } from '../fhirtypes';
  * @param {string} projectDir - User's specified project directory
  * @param {ImplementationGuideDefinitionParameter[]} configParameters - optional, an array of config parameters in which to
  *    determine if there are additional resource paths for predefined resource
- * @param {FHIRDefinitions} defs - The FHIRDefinitions object to load definitions into
+ * @returns string[] list of paths to search for custom resources
  */
-export function loadCustomResources(
+export function getLocalResourcePaths(
   resourceDir: string,
   projectDir: string = null,
-  configParameters: ImplementationGuideDefinitionParameter[] = null,
-  defs: FHIRDefinitions
-): void {
+  configParameters: ImplementationGuideDefinitionParameter[] = null
+): string[] {
   // Similar code for loading custom resources exists in IGExporter.ts addPredefinedResources()
   const pathEnds = [
     'capabilities',
@@ -42,70 +39,7 @@ export function loadCustomResources(
       .filter(directoryPath => fs.existsSync(directoryPath));
     if (pathResourceDirectories) predefinedResourcePaths.push(...pathResourceDirectories);
   }
-  const converter = new FHIRConverter();
-  let invalidFileCount = 0;
-  for (const dirPath of predefinedResourcePaths) {
-    let foundSpreadsheets = false;
-    if (fs.existsSync(dirPath)) {
-      const files = getFilesRecursive(dirPath);
-      for (const file of files) {
-        let resourceJSON: any;
-        try {
-          if (junk.is(file)) {
-            // Ignore "junk" files created by the OS, like .DS_Store on macOS and Thumbs.db on Windows
-            continue;
-          } else if (file.endsWith('.json')) {
-            resourceJSON = fs.readJSONSync(file);
-          } else if (file.endsWith('-spreadsheet.xml')) {
-            foundSpreadsheets = true;
-            continue;
-          } else if (file.endsWith('xml')) {
-            const xml = fs.readFileSync(file).toString();
-            if (/<\?mso-application progid="Excel\.Sheet"\?>/m.test(xml)) {
-              foundSpreadsheets = true;
-              continue;
-            }
-            resourceJSON = converter.xmlToObj(xml);
-          } else {
-            invalidFileCount++;
-            logger.debug(`File not processed by SUSHI: ${file}`);
-            continue;
-          }
-        } catch (e) {
-          if (e.message.startsWith('Unknown resource type:')) {
-            // Skip unknown FHIR resource types. When we have instances of Logical Models,
-            // the resourceType will not be recognized as a known FHIR resourceType, but that's okay.
-            continue;
-          }
-          logger.error(`Loading ${file} failed with the following error:\n${e.message}`);
-          if (e.stack) {
-            logger.debug(e.stack);
-          }
-          continue;
-        }
-        // All resources are added to the predefined map, so that this map can later be used to
-        // access predefined resources in the IG Exporter
-        defs.addPredefinedResource(file, resourceJSON);
-        if (path.basename(dirPath) !== 'examples') {
-          // add() will only add resources of resourceType:
-          // StructureDefinition, ValueSet, CodeSystem, or ImplementationGuide
-          defs.add(resourceJSON);
-        }
-      }
-    }
-    if (foundSpreadsheets) {
-      logger.info(
-        `Found spreadsheets in directory ${dirPath}. SUSHI does not support spreadsheets, so any resources in the spreadsheets will be ignored.`
-      );
-    }
-  }
-  if (invalidFileCount > 0) {
-    logger.info(
-      invalidFileCount > 1
-        ? `Found ${invalidFileCount} files in input/* resource folders that were neither XML nor JSON. These files were not processed as resources by SUSHI. To see the unprocessed files in the logs, run SUSHI with the "--log-level debug" flag.`
-        : `Found ${invalidFileCount} file in an input/* resource folder that was neither XML nor JSON. This file was not processed as a resource by SUSHI. To see the unprocessed file in the logs, run SUSHI with the "--log-level debug" flag.`
-    );
-  }
+  return predefinedResourcePaths;
 }
 
 /**

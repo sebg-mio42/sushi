@@ -365,7 +365,11 @@ export async function loadAutomaticDependencies(
     });
     if (!alreadyConfigured) {
       try {
-        await mergeDependency(dep.packageId, dep.version, defs, undefined, logMessage);
+        const status = await (defs as FHIRDefinitions).newFPL?.loadPackage(
+          dep.packageId,
+          dep.version
+        );
+        logger.info(`Load status for ${dep.packageId}#${dep.version}: ${status}`);
       } catch (e) {
         let message = `Failed to load automatically-provided ${dep.packageId}#${dep.version}`;
         if (process.env.FPL_REGISTRY) {
@@ -380,6 +384,22 @@ export async function loadAutomaticDependencies(
           logger.debug(e.stack);
         }
       }
+      // try {
+      //   await mergeDependency(dep.packageId, dep.version, defs, undefined, logMessage);
+      // } catch (e) {
+      //   let message = `Failed to load automatically-provided ${dep.packageId}#${dep.version}`;
+      //   if (process.env.FPL_REGISTRY) {
+      //     message += ` from custom FHIR package registry ${process.env.FPL_REGISTRY}.`;
+      //   }
+      //   message += `: ${e.message}`;
+      //   if (/certificate/.test(e.message)) {
+      //     message += CERTIFICATE_MESSAGE;
+      //   }
+      //   logger.warn(message);
+      //   if (e.stack) {
+      //     logger.debug(e.stack);
+      //   }
+      // }
     }
   }
 }
@@ -421,16 +441,29 @@ async function loadConfiguredDependencies(
       );
       await loadSupplementalFHIRPackage(EXT_PKG_TO_FHIR_PKG_MAP[dep.packageId], defs);
     } else {
-      await mergeDependency(dep.packageId, dep.version, defs, undefined, logMessage).catch(e => {
-        let message = `Failed to load ${dep.packageId}#${dep.version}: ${e.message}`;
-        if (/certificate/.test(e.message)) {
-          message += CERTIFICATE_MESSAGE;
-        }
-        logger.error(message);
-        if (e.stack) {
-          logger.debug(e.stack);
-        }
-      });
+      await defs.newFPL
+        ?.loadPackage(dep.packageId, dep.version)
+        .then(status => logger.info(`Load status for ${dep.packageId}#${dep.version}: ${status}`))
+        .catch(e => {
+          let message = `Failed to load ${dep.packageId}#${dep.version}: ${e.message}`;
+          if (/certificate/.test(e.message)) {
+            message += CERTIFICATE_MESSAGE;
+          }
+          logger.error(message);
+          if (e.stack) {
+            logger.debug(e.stack);
+          }
+        });
+      // await mergeDependency(dep.packageId, dep.version, defs, undefined, logMessage).catch(e => {
+      //   let message = `Failed to load ${dep.packageId}#${dep.version}: ${e.message}`;
+      //   if (/certificate/.test(e.message)) {
+      //     message += CERTIFICATE_MESSAGE;
+      //   }
+      //   logger.error(message);
+      //   if (e.stack) {
+      //     logger.debug(e.stack);
+      //   }
+      // });
     }
   }
 }

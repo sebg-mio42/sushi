@@ -47,6 +47,7 @@
         "@types/opener": "^1.4.0",
         "@types/readline-sync": "^1.4.3",
         "@types/sax": "^1.2.1",
+        "@types/sql.js": "^1.4.9",
         "@types/temp": "^0.9.4",
         "@types/text-table": "^0.2.3",
         "@types/valid-url": "^1.0.3",
@@ -1736,6 +1737,12 @@
       "integrity": "sha512-RWVEhh/zGXpAVF/ZChwNnv7r4rvqzJ7lYNSmZSVTxjV0PBLf6Qu7RNg+SUtkpzxmiNkjCx0Xn2tPp7FIkshJwQ==",
       "dev": true
     },
+    "node_modules/@types/emscripten": {
+      "version": "1.39.11",
+      "resolved": "https://registry.npmjs.org/@types/emscripten/-/emscripten-1.39.11.tgz",
+      "integrity": "sha512-dOeX2BeNA7j6BTEqJQL3ut0bRCfsyQMd5i4FT8JfHfYhAOuJPCGh0dQFbxVJxUyQ+75x6enhDdndGb624/QszA==",
+      "dev": true
+    },
     "node_modules/@types/fs-extra": {
       "version": "11.0.4",
       "resolved": "https://registry.npmjs.org/@types/fs-extra/-/fs-extra-11.0.4.tgz",
@@ -1878,6 +1885,16 @@
       "resolved": "https://registry.npmjs.org/@types/semver/-/semver-7.5.6.tgz",
       "integrity": "sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==",
       "dev": true
+    },
+    "node_modules/@types/sql.js": {
+      "version": "1.4.9",
+      "resolved": "https://registry.npmjs.org/@types/sql.js/-/sql.js-1.4.9.tgz",
+      "integrity": "sha512-ep8b36RKHlgWPqjNG9ToUrPiwkhwh0AEzy883mO5Xnd+cL6VBH1EvSjBAAuxLUFF2Vn/moE3Me6v9E1Lo+48GQ==",
+      "dev": true,
+      "dependencies": {
+        "@types/emscripten": "*",
+        "@types/node": "*"
+      }
     },
     "node_modules/@types/stack-utils": {
       "version": "2.0.3",

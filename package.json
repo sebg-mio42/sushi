@@ -61,6 +61,7 @@
     "@types/opener": "^1.4.0",
     "@types/readline-sync": "^1.4.3",
     "@types/sax": "^1.2.1",
+    "@types/sql.js": "^1.4.9",
     "@types/temp": "^0.9.4",
     "@types/text-table": "^0.2.3",
     "@types/valid-url": "^1.0.3",
